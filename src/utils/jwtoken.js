@@ -8,16 +8,6 @@ export function createNewToken(userId) {
   return token;
 }
 
-export const authUser = (req, res, next) => (error, decoded) => {
-  if (error) {
-    return res
-      .status(401)
-      .json({ success: false, message: 'Falha na autenticação' });
-  }
-
-  next();
-};
-
 export function validateToken(req, res, next) {
   const token = req.headers['authorization']?.split(' ')[1];
 
@@ -27,5 +17,13 @@ export function validateToken(req, res, next) {
       .json({ success: false, message: 'No token provided!' });
   }
 
-  jwt.verify(token, jwtSecret, authUser(req, res, next));
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    req.userId = decoded.sub._id;
+    next();
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ success: false, message: 'Falha na autenticação' });
+  }
 }

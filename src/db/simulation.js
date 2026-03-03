@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 
 const SimulationSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
     name: { type: String, required: true },
 
     initialAmount: { type: Number, required: true },

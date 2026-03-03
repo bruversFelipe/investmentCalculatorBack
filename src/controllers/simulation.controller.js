@@ -8,6 +8,7 @@ import { calculateFixedIncome, calculateVariableIncome, calculateComparison } fr
 export async function createSimulation(req, res, next) {
   try {
     const payload = req.body;
+    const userId = req.userId;
 
     const requiredFields = [
       'name',
@@ -46,6 +47,7 @@ export async function createSimulation(req, res, next) {
     );
 
     const simulation = new SimulationSchema({
+      userId,
       name: payload.name,
       initialAmount: payload.initialAmount,
       monthlyContribution: payload.monthlyContribution,
@@ -80,8 +82,10 @@ export async function createSimulation(req, res, next) {
 
 export async function listSimulations(req, res, next) {
   try {
+    const userId = req.userId;
+
     const simulations = await SimulationSchema
-      .find({})
+      .find({ userId })
       .select('_id name createdAt')
       .sort({ createdAt: -1 });
 
@@ -102,8 +106,9 @@ export async function listSimulations(req, res, next) {
 export async function getSimulation(req, res, next) {
   try {
     const { id } = req.params;
+    const userId = req.userId;
 
-    const simulation = await SimulationSchema.findById(id);
+    const simulation = await SimulationSchema.findOne({ _id: id, userId });
 
     if (!simulation) {
       return res.json(answerShell({}, 'Simulação não encontrada', false));
@@ -126,8 +131,9 @@ export async function getSimulation(req, res, next) {
 export async function deleteSimulation(req, res, next) {
   try {
     const { id } = req.params;
+    const userId = req.userId;
 
-    const simulation = await SimulationSchema.findByIdAndDelete(id);
+    const simulation = await SimulationSchema.findOneAndDelete({ _id: id, userId });
 
     if (!simulation) {
       return res.json(answerShell({}, 'Simulação não encontrada', false));
